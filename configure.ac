@@ -1,4 +1,4 @@
-AC_INIT([ThorsCrypto], [0.1], [YourName@Email.com])
+AC_INIT([ThorsCrypto], [0.1], [Loki.Astari@gmail.com])
 AC_PREREQ([2.65])
 
 # Set up the build system
@@ -11,7 +11,7 @@ AC_CONFIG_AUX_DIR([build/autotools/build])
 AX_THOR_FUNC_BUILD
 
 
-AC_CONFIG_SRCDIR([src/ThorsCrypto/ThorsCrypto.cpp])
+AC_CONFIG_SRCDIR([src/ThorsCrypto/scram.h])
 
 # Find the C++ Copiler
 # The minimumm requirements.
@@ -23,6 +23,7 @@ AX_THOR_FUNC_LANG_FLAG(17)
 # Find the code coverage tool.
 # All the testing will depend on this.
 AX_THOR_PROG_COV
+AX_THOR_FUNC_USE_CRYPTO
 
 # Add support for shared libraries.
 LT_INIT
