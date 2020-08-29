@@ -4,10 +4,12 @@
 #ifdef  __APPLE__
 #define COMMON_DIGEST_FOR_OPENSSL
 #include <CommonCrypto/CommonDigest.h>
+#define THOR_MD5(data, len, dst)        CC_MD5(data, len, dst)
 #define THOR_SHA1(data, len, dst)       CC_SHA1(data, len, dst)
 #define THOR_SHA256(data, len, dst)     CC_SHA256(data, len, dst)
 #else
 #include <openssl/sha.h>
+#define THOR_MD5(data, len, dst)        MD5(data, len, dst)
 #define THOR_SHA1(data, len, dst)       SHA1(data, len, dst)
 #define THOR_SHA256(data, len, dst)     SHA256(data, len, dst)
 #endif
@@ -46,9 +48,41 @@ class DigestStore
 template<typename Hash>
 using Digest = typename Hash::DigestStore;
 
+template<typename Hash>
+std::string hexdigest(std::string const& message)
+{
+    Digest<Hash>    digest;
+    Hash::hash(message, digest);
+
+    std::string buffer;
+    buffer.reserve(Hash::digestSize * 2);
+    for (auto val: digest)
+    {
+        char hi = (val >> 4) & 0xF;
+        hi = (hi < 10 ? '0' : 'a' - 10) + hi;
+        char lo  = (val >> 0) & 0xF;
+        lo = (lo < 10 ? '0' : 'a' - 10) + lo;
+        buffer += hi;
+        buffer += lo;
+    }
+
+    return buffer;
+}
+
 // These versions of the hashing function are good for hashing short
 // amounts of text. Use these for passwords and validation hashes
 // do not use them for hashing large documents.
+struct Md5
+{
+    static constexpr std::size_t digestSize = MD5_DIGEST_LENGTH;
+    using DigestStore = DigestStore<MD5_DIGEST_LENGTH>;
+
+    static void hash(DigestStore& src,             DigestStore& dst)   {THOR_MD5(src, MD5_DIGEST_LENGTH, dst);}
+    static void hash(std::string_view src,         DigestStore& dst)   {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
+    static void hash(std::string const& src,       DigestStore& dst)   {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
+    // Use only if you know the destination is large enough!!
+    static void hashUnsafe(std::string_view src,   DigestPtr dst)      {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
+};
 struct Sha1
 {
     static constexpr std::size_t digestSize = SHA_DIGEST_LENGTH;
