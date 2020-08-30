@@ -9,6 +9,7 @@
 #define THOR_SHA256(data, len, dst)     CC_SHA256(data, len, dst)
 #else
 #include <openssl/sha.h>
+#include <openssl/md5.h>
 #define THOR_MD5(data, len, dst)        MD5(data, len, dst)
 #define THOR_SHA1(data, len, dst)       SHA1(data, len, dst)
 #define THOR_SHA256(data, len, dst)     SHA256(data, len, dst)
