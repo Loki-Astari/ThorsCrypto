@@ -33,7 +33,7 @@ using Byte      = char unsigned;
 using DigestPtr = Byte*;
 
 template<std::size_t size>
-class DigestStore
+class DigestStoreBase
 {
     std::array<Byte, size>      data;
     public:
@@ -76,7 +76,7 @@ std::string hexdigest(std::string const& message)
 struct Md5
 {
     static constexpr std::size_t digestSize = MD5_DIGEST_LENGTH;
-    using DigestStore = DigestStore<MD5_DIGEST_LENGTH>;
+    using DigestStore = DigestStoreBase<MD5_DIGEST_LENGTH>;
 
     static void hash(DigestStore& src,             DigestStore& dst)   {THOR_MD5(src, MD5_DIGEST_LENGTH, dst);}
     static void hash(std::string_view src,         DigestStore& dst)   {THOR_MD5(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
@@ -87,7 +87,7 @@ struct Md5
 struct Sha1
 {
     static constexpr std::size_t digestSize = SHA_DIGEST_LENGTH;
-    using DigestStore = DigestStore<SHA_DIGEST_LENGTH>;
+    using DigestStore = DigestStoreBase<SHA_DIGEST_LENGTH>;
 
     static void hash(DigestStore& src,             DigestStore& dst)   {THOR_SHA1(src, SHA_DIGEST_LENGTH, dst);}
     static void hash(std::string_view src,         DigestStore& dst)   {THOR_SHA1(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
@@ -98,7 +98,7 @@ struct Sha1
 struct Sha256
 {
     static constexpr std::size_t digestSize = SHA256_DIGEST_LENGTH;
-    using DigestStore = DigestStore<SHA256_DIGEST_LENGTH>;
+    using DigestStore = DigestStoreBase<SHA256_DIGEST_LENGTH>;
 
     static void hash(DigestStore& src,             DigestStore& dst)   {THOR_SHA256(src, SHA256_DIGEST_LENGTH, dst);}
     static void hash(std::string_view src,         DigestStore& dst)   {THOR_SHA256(reinterpret_cast<Byte const*>(&src[0]), std::size(src), dst);}
