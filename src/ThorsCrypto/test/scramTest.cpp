@@ -32,12 +32,12 @@ Server's server signature (hex): ae617da6a57c4bbb2e0286568dae1d251905b0a4
 
 TEST(scramTest, SimpleTeat)
 {
-    ScramClient     client("user");;
+    ScramClientSha1     client("user");;
 
     std::string clientFirstMessage = client.getFirstMessage();
     EXPECT_EQ(clientFirstMessage, "n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL");
 
-    ScramServer     server(clientFirstMessage);
+    ScramServerSha1     server(clientFirstMessage);
     std::string serverFirstMessage = server.getFirstMessage();
     EXPECT_EQ(serverFirstMessage, "r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92,i=4096");
 

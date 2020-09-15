@@ -108,11 +108,13 @@ class ScramBase
         }
 };
 
+template<typename Hi, typename HMAC, typename H>
 class ScramClient: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
 {
+    using Base = ScramBase<Hi, HMAC, H>;
     public:
         ScramClient(std::string const& userName, NonceGenerator&& nonceGenerator = [](){return "fyko+d2lbbFgONRv9qkxdawL";})
-            : ScramBase(std::string("n=") + userName + ",r=" + nonceGenerator(), std::move(nonceGenerator))
+            : Base(std::string("n=") + userName + ",r=" + nonceGenerator(), std::move(nonceGenerator))
         {}
         std::string getFirstMessage()
         {
@@ -132,8 +134,11 @@ class ScramClient: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
         }
 };
 
-class ScramServer: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
+template<typename Hi, typename HMAC, typename H>
+class ScramServer: public ScramBase<Hi, HMAC, H>
 {
+    using Base = ScramBase<Hi, HMAC, H>;
+
     long            iterationCount;
     DBInfoAccess    dbInfo;
 
@@ -142,29 +147,31 @@ class ScramServer: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
                     std::size_t iterationCount = 4096,
                     NonceGenerator&& nonceGenerator = [](){return "3rfcNHYJY1ZVvWVs7j";},
                     DBInfoAccess&&   dbInfo         = [](DBInfoType type, std::string const& /*user*/){return type == DBInfoType::Password ? "pencil" : "QSXCR+Q6sek8bf92";})
-            : ScramBase(clientFirstMessage.substr(3), std::move(nonceGenerator))
+            : Base(clientFirstMessage.substr(3), std::move(nonceGenerator))
             , iterationCount(iterationCount)
             , dbInfo(std::move(dbInfo))
         {}
         std::string getFirstMessage()
         {
             using namespace std::literals;
-            std::string message = "r="s + getClientNonce() + generateNonce() + ",s="s + dbInfo(DBInfoType::Salt, getUserFromMessage()) + ",i="s + std::to_string(iterationCount);
-            setServiceFirstMessage(message);
+            std::string message = "r="s + Base::getClientNonce() + Base::generateNonce() + ",s="s + dbInfo(DBInfoType::Salt, Base::getUserFromMessage()) + ",i="s + std::to_string(iterationCount);
+            Base::setServiceFirstMessage(message);
             return message;
         }
         std::string getProofMessage(std::string const& clientProof)
         {
             using namespace std::literals;
-            calculateClientScramHash(normalize(dbInfo(DBInfoType::Password, getUserFromMessage())));
-            if (getClientProof() == getProofFromClinet(clientProof)  && validateNonce(clientProof))
+            Base::calculateClientScramHash(Base::normalize(dbInfo(DBInfoType::Password, Base::getUserFromMessage())));
+            if (Base::getClientProof() == Base::getProofFromClinet(clientProof)  && Base::validateNonce(clientProof))
             {
-                return "v="s + getServerSignature();
+                return "v="s + Base::getServerSignature();
             }
             return "";
         }
 };
 
+using ScramClientSha1   = ScramClient<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>;
+using ScramServerSha1   = ScramServer<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>;
 }
 
 #endif
