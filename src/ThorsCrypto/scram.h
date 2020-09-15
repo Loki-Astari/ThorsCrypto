@@ -109,7 +109,7 @@ class ScramBase
 };
 
 template<typename Hi, typename HMAC, typename H>
-class ScramClient: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
+class ScramClient: public ScramBase<Hi, HMAC, H>
 {
     using Base = ScramBase<Hi, HMAC, H>;
     public:
@@ -119,18 +119,18 @@ class ScramClient: public ScramBase<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>
         std::string getFirstMessage()
         {
             using namespace std::literals;
-            return "n,,"s + getClientFirstMessageBare();;
+            return "n,,"s + Base::getClientFirstMessageBare();;
         }
         std::string getProofMessage(std::string const& password, std::string const& sfm)
         {
             using namespace std::literals;
-            setServiceFirstMessage(sfm);
-            calculateClientScramHash(password);
-            return getClientFinalMessageWithoutProof() + ",p="s + getClientProof();
+            Base::setServiceFirstMessage(sfm);
+            Base::calculateClientScramHash(password);
+            return Base::getClientFinalMessageWithoutProof() + ",p="s + Base::getClientProof();
         }
         bool verifyServer(std::string const& serverProof)
         {
-            return getServerSignature() == getVerification(serverProof);
+            return Base::getServerSignature() == Base::getVerification(serverProof);
         }
 };
 
@@ -172,6 +172,8 @@ class ScramServer: public ScramBase<Hi, HMAC, H>
 
 using ScramClientSha1   = ScramClient<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>;
 using ScramServerSha1   = ScramServer<Pbkdf2<HMac<Sha1>>, HMac<Sha1>, Sha1>;
+using ScramClientSha256 = ScramClient<Pbkdf2<HMac<Sha256>>, HMac<Sha256>, Sha256>;
+using ScramServerSha256 = ScramServer<Pbkdf2<HMac<Sha256>>, HMac<Sha256>, Sha256>;
 }
 
 #endif
