@@ -1,6 +1,8 @@
 #ifndef THORS_ANVIL_CRYPTO_BASE_H
 #define THORS_ANVIL_CRYPTO_BASE_H
 
+#include "ThorsLogging/ThorsLogging.h"
+
 namespace ThorsAnvil::Crypto
 {
 
@@ -59,7 +61,9 @@ class Base64DecodeIterator
                 unsigned char b64 = convert[tmp & 0x7F];
                 if (b64 == 0x8F || tmp > 0x7F)
                 {
-                    throw std::runtime_error("Base64DecodeIterator::operator*: invalid input");
+                    ThorsLogAndThrow("ThorsAnvil::Crypto::Base64DecodeIterator",
+                                     "operator*()",
+                                     "invalid input");
                 }
                 if (b64 == 0x40)    // We found a padding byte '='
                 {
