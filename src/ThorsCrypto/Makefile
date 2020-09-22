@@ -2,11 +2,9 @@
 THORSANVIL_ROOT				?= $(realpath ../../)
 
 TARGET						= ThorsCrypto.head
-LDLIBS						= -lcrypto
-LDFLAGS						= $(crypto_ROOT_LIBDIR)
+LDLIBS_EXTERN_BUILD			= crypto
 
 UNITTEST_CXXFLAGS			+= -Wno-deprecated-declarations
-UNITTEST_LDLIBS				+= -lcrypto
 UNITTEST_LINK_LIBS			+= ThorsLogging
 
 include $(THORSANVIL_ROOT)/build/tools/Makefile
