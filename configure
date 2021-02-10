@@ -699,6 +699,7 @@ EGREP
 GREP
 SED
 LIBTOOL
+crypto_ROOT_LIB
 crypto_ROOT_INCDIR
 crypto_ROOT_LIBDIR
 COV
@@ -5760,9 +5761,9 @@ if test "x$ac_cv_lib_crypto_SHA1_Init" = xyes; then :
 
             if test "$with_cryptoroot" != ""; then :
 
-                    crypto_ROOT_LIBDIR="-L $with_cryptoroot/lib"
+                    crypto_ROOT_LIBDIR=$with_cryptoroot/lib
 
-                    crypto_ROOT_INCDIR="-I $with_cryptoroot/include"
+                    crypto_ROOT_INCDIR=$with_cryptoroot/include
 
 
 fi
@@ -5787,6 +5788,21 @@ Error: Could not find libcrypto
 
 fi
 
+    # AC_CANONICAL_HOST is needed to access the 'host_os' variable
+
+    case "${host_os}" in
+        linux*)
+            crypto_ROOT_LIB="ssl crypto"
+
+            ;;
+        darwin*)
+            crypto_ROOT_LIB=""
+
+            ;;
+        *)
+            as_fn_error $? "\"OS $host_os is not supported\"" "$LINENO" 5
+            ;;
+    esac
 
     LDFLAGS="${ORIG_LDFLAGS}"
 
