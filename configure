@@ -699,9 +699,8 @@ EGREP
 GREP
 SED
 LIBTOOL
+crypto_ROOT_DIR
 crypto_ROOT_LIB
-crypto_ROOT_INCDIR
-crypto_ROOT_LIBDIR
 COV
 CXX_STD_FLAG
 CXXSTDVER
@@ -5712,6 +5711,9 @@ The coverage tool \"${COV}\" does not seem to be working.
 fi
 
 
+    crypto_ROOT_LIB=""
+    crypto_ROOT_DIR=""
+
 
 # Check whether --with-cryptoroot was given.
 if test "${with_cryptoroot+set}" = set; then :
@@ -5761,10 +5763,7 @@ if test "x$ac_cv_lib_crypto_SHA1_Init" = xyes; then :
 
             if test "$with_cryptoroot" != ""; then :
 
-                    crypto_ROOT_LIBDIR=$with_cryptoroot/lib
-
-                    crypto_ROOT_INCDIR=$with_cryptoroot/include
-
+                    crypto_ROOT_DIR="$with_cryptoroot"
 
 fi
 
@@ -5792,12 +5791,10 @@ fi
 
     case "${host_os}" in
         linux*)
-            crypto_ROOT_LIB="ssl crypto"
-
+            crypto_ROOT_LIB="-lssl -lcrypto"
             ;;
         darwin*)
             crypto_ROOT_LIB=""
-
             ;;
         *)
             as_fn_error $? "\"OS $host_os is not supported\"" "$LINENO" 5
@@ -5805,6 +5802,10 @@ fi
     esac
 
     LDFLAGS="${ORIG_LDFLAGS}"
+    crypto_ROOT_LIB=${crypto_ROOT_LIB}
+
+    crypto_ROOT_DIR=${crypto_ROOT_DIR}
+
 
 
 # Add support for shared libraries.
@@ -17346,12 +17347,7 @@ ac_script='s/[\\$]/&&/g;s/;s,x,x,$//'
 program_transform_name=`$as_echo "$program_transform_name" | sed "$ac_script"`
 
 if test x"${MISSING+set}" != xset; then
-  case $am_aux_dir in
-  *\ * | *\	*)
-    MISSING="\${SHELL} \"$am_aux_dir/missing\"" ;;
-  *)
-    MISSING="\${SHELL} $am_aux_dir/missing" ;;
-  esac
+  MISSING="\${SHELL} '$am_aux_dir/missing'"
 fi
 # Use eval to expand $SHELL
 if eval "$MISSING --is-lightweight"; then
