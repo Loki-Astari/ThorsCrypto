@@ -3,4 +3,6 @@
 crypto_ROOT_LIB=@crypto_ROOT_LIB@
 crypto_ROOT_LIBDIR=@crypto_ROOT_LIBDIR@
 crypto_ROOT_INCDIR=@crypto_ROOT_INCDIR@
+crypto_ROOT_DIR=@crypto_ROOT_DIR@
+crypto_ROOT_LIB=@crypto_ROOT_LIB@
 
