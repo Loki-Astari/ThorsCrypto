@@ -13,17 +13,20 @@ AX_THOR_FUNC_BUILD
 
 
 AC_CONFIG_SRCDIR([src/ThorsCrypto/scram.h])
-
-# Find the C++ Copiler
-# The minimumm requirements.
 AC_PROG_CXX
+AX_THOR_PROG_COV
+
+AX_THOR_LIB_SELECT
+
+AC_LANG_PUSH([C++])
 AX_CHECK_COMPILE_FLAG([-ansi], [AC_SUBST([CXXFLAGS], [" -ansi"])])
 # Check what version of the C++ language is supported
+AC_LANG_POP([C++])
+
 AX_THOR_FUNC_LANG_FLAG(17)
 
 # Find the code coverage tool.
 # All the testing will depend on this.
-AX_THOR_PROG_COV
 AX_THOR_FUNC_USE_CRYPTO
 
 # Add support for shared libraries.
