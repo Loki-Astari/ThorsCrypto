@@ -676,9 +676,6 @@ AM_BACKSLASH
 AM_DEFAULT_VERBOSITY
 AM_DEFAULT_V
 AM_V
-CSCOPE
-ETAGS
-CTAGS
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
@@ -760,12 +757,17 @@ StdFlag17
 StdFlag14
 StdFlag11
 CXXMaxLanguage
+DELETE_NON_VIRTUAL_DTOR
+DELETE_NON_ABSTRACT_NON_VIRTUAL_DTOR
+INCONSISTENT_MISSING_OVERRIDE
 NO_DEPRECATED_REGISTER_TEST
 NO_UNUSED_PRIVATE_FIELD_TEST
 ac_ct_CC
 CFLAGS
 CC
 COV
+DARK_MODE
+COLOUR_STATE
 THOR_TARGETLIBS
 VERATOOL
 TestVera
@@ -778,6 +780,7 @@ CXXFLAGS
 CXX
 UNZIP
 DefaultLinkDir
+THOR_STD_INCLUDES
 target_alias
 host_alias
 build_alias
@@ -823,6 +826,9 @@ ac_user_opts='
 enable_option_checking
 enable_vera
 with_hostbuild
+enable_colour
+enable_dark_mode
+with_standard
 with_cryptoroot
 enable_shared
 enable_static
@@ -1477,6 +1483,11 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --disable-vera          Disable vera. Disable Static analysis of source.
 
+  --disable-colour        Turns off text colouring in the makefile output
+
+  --enable-dark-mode      If your background is black some text that was grey
+                          is turned yellow
+
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -1493,6 +1504,10 @@ Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
   --with-hostbuild=<dir>  Use the build tools located at <dir>
+
+  --with-standard=<version>
+                          Use the specified version <version> of the C++
+                          standard
 
   --with-cryptoroot=<location>
                           Directory of CRYPTO_ROOT
@@ -2920,9 +2935,17 @@ ln -s .build build | echo "Build Already Setup"
 
     DefaultLinkDir="/usr/local"
     host=$(uname -p)
-    if test ${host} == "arm"
+    if test "${host}" == "arm"
 then :
-  DefaultLinkDir="/opt/homebrew"
+
+        DefaultLinkDir="/opt/homebrew"
+        if test "${prefix}" == "NONE"
+then :
+  prefix=${DefaultLinkDir}
+fi
+        THOR_STD_INCLUDES=-I${DefaultLinkDir}/include
+
+
 fi
     DefaultLinkDir=${DefaultLinkDir}
 
@@ -3737,6 +3760,50 @@ then :
 fi
 
 
+    COLOUR_STATE="ON"
+    DARK_MODE=""
+    # Check whether --enable-colour was given.
+if test ${enable_colour+y}
+then :
+  enableval=$enable_colour;
+fi
+
+    # Check whether --enable-dark-mode was given.
+if test ${enable_dark_mode+y}
+then :
+  enableval=$enable_dark_mode;
+fi
+
+    if test "x$enable_colour" == "xno"
+then :
+
+            COLOUR_STATE="OFF"
+            subconfigure="${subconfigure} --disable-colour"
+
+
+fi
+    if test "x$enable_dark-mode" != "xyes"
+then :
+
+            DARK_MODE="ON"
+            subconfigure="${subconfigure} --enable-dark-mode"
+
+
+fi
+    COLOUR_STATE=${COLOUR_STATE}
+
+    DARK_MODE=${DARK_MODE}
+
+
+
+
+printf "%s\n" "#define HEADER_ONLY 0" >>confdefs.h
+
+
+printf "%s\n" "#define HEADER_ONLY_INCLUDE /**/" >>confdefs.h
+
+
+
     if test "x${with_hostbuild}" == "x"
 then :
 
@@ -4156,7 +4223,7 @@ fi
 fi
 
 fi
-    ${COV} --version 2>&1 | grep -Eo '(\d+\.)+\d+' || ${COV} --version 2>&1 | grep -Po '(\d+\.)+\d+' > /dev/null
+    ${COV} --version 2>&1 | grep -Eo '([[:digit:]]+\.)+[[:digit:]]+' || ${COV} --version 2>&1 | grep -Po '(\d+\.)+\d+' > /dev/null
     if test $? != 0
 then :
   as_fn_error $? "
@@ -5135,20 +5202,166 @@ else $as_nop
   :
 fi
 
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Winconsistent-missing-override" >&5
+printf %s "checking whether C compiler accepts -Winconsistent-missing-override... " >&6; }
+if test ${ax_cv_check_cflags___Winconsistent_missing_override+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Winconsistent-missing-override"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Winconsistent_missing_override=yes
+else $as_nop
+  ax_cv_check_cflags___Winconsistent_missing_override=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Winconsistent_missing_override" >&5
+printf "%s\n" "$ax_cv_check_cflags___Winconsistent_missing_override" >&6; }
+if test "x$ax_cv_check_cflags___Winconsistent_missing_override" = xyes
+then :
+  INCONSISTENT_MISSING_OVERRIDE=-Winconsistent-missing-override
 
 
+else $as_nop
+  :
+fi
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wdelete-non-abstract-non-virtual-dtor" >&5
+printf %s "checking whether C compiler accepts -Wdelete-non-abstract-non-virtual-dtor... " >&6; }
+if test ${ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Wdelete-non-abstract-non-virtual-dtor"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor=yes
+else $as_nop
+  ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor" >&5
+printf "%s\n" "$ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor" >&6; }
+if test "x$ax_cv_check_cflags___Wdelete_non_abstract_non_virtual_dtor" = xyes
+then :
+  DELETE_NON_ABSTRACT_NON_VIRTUAL_DTOR=-Wdelete-non-abstract-non-virtual-dtor
+
+
+else $as_nop
+  :
+fi
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C compiler accepts -Wdelete-non-virtual-dtor" >&5
+printf %s "checking whether C compiler accepts -Wdelete-non-virtual-dtor... " >&6; }
+if test ${ax_cv_check_cflags___Wdelete_non_virtual_dtor+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CFLAGS
+  CFLAGS="$CFLAGS  -Wdelete-non-virtual-dtor"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_compile "$LINENO"
+then :
+  ax_cv_check_cflags___Wdelete_non_virtual_dtor=yes
+else $as_nop
+  ax_cv_check_cflags___Wdelete_non_virtual_dtor=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cflags___Wdelete_non_virtual_dtor" >&5
+printf "%s\n" "$ax_cv_check_cflags___Wdelete_non_virtual_dtor" >&6; }
+if test "x$ax_cv_check_cflags___Wdelete_non_virtual_dtor" = xyes
+then :
+  DELETE_NON_VIRTUAL_DTOR=-Wdelete-non-virtual-dtor
+
+
+else $as_nop
+  :
+fi
+
+
+
+
+
+
+
+# Check whether --with-standard was given.
+if test ${with_standard+y}
+then :
+  withval=$with_standard;
+fi
 
 
         minLangFeature=17
+        askedLangFeature=${minLangFeature}
+        if test "x${with_standard}" != "x"
+then :
+
+                askedLangFeature=${with_standard}
+
+
+fi
+
         if test "" = ""
 then :
   maxLangFeature=17
 else $as_nop
-  maxLangFeature=
+  maxLangFeature=$askedLangFeature
+fi
+        if test $minLangFeature -gt $askedLangFeature
+then :
+  as_fn_error 1 "Invalid Language requested: ${askedLangFeature}. Minimum: ${minLangFeature}" "$LINENO" 5
+fi
+        if test $askedLangFeature -gt $maxLangFeature
+then :
+  as_fn_error 1 "Invalid Language requested: ${askedLangFeature}. Maximum: ${maxLangFeature}" "$LINENO" 5
 fi
         if test $minLangFeature -gt $maxLangFeature
 then :
-  as_fn_error 1 "Invalid Language Value" "$LINENO" 5
+  as_fn_error 1 "Invalid Language max: ${maxLangFeature} can not be less ${minLangFeature}" "$LINENO" 5
 fi
 
         ac_ext=cpp
@@ -5319,6 +5532,46 @@ else $as_nop
   :
 fi
 
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -std=c++23" >&5
+printf %s "checking whether C++ compiler accepts -std=c++23... " >&6; }
+if test ${ax_cv_check_cxxflags___std_cpp23+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -std=c++23"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  ax_cv_check_cxxflags___std_cpp23=yes
+else $as_nop
+  ax_cv_check_cxxflags___std_cpp23=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___std_cpp23" >&5
+printf "%s\n" "$ax_cv_check_cxxflags___std_cpp23" >&6; }
+if test "x$ax_cv_check_cxxflags___std_cpp23" = xyes
+then :
+  CXXMaxLanguage=20
+ StdFlag20=-std=c++20
+
+else $as_nop
+  :
+fi
+
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -std=c++1x" >&5
 printf %s "checking whether C++ compiler accepts -std=c++1x... " >&6; }
 if test ${ax_cv_check_cxxflags___std_cpp1x+y}
@@ -5479,45 +5732,71 @@ else $as_nop
   :
 fi
 
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether C++ compiler accepts -std=c++2b" >&5
+printf %s "checking whether C++ compiler accepts -std=c++2b... " >&6; }
+if test ${ax_cv_check_cxxflags___std_cpp2b+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+
+  ax_check_save_flags=$CXXFLAGS
+  CXXFLAGS="$CXXFLAGS  -std=c++2b"
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+int
+main (void)
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_compile "$LINENO"
+then :
+  ax_cv_check_cxxflags___std_cpp2b=yes
+else $as_nop
+  ax_cv_check_cxxflags___std_cpp2b=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam conftest.$ac_ext
+  CXXFLAGS=$ax_check_save_flags
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ax_cv_check_cxxflags___std_cpp2b" >&5
+printf "%s\n" "$ax_cv_check_cxxflags___std_cpp2b" >&6; }
+if test "x$ax_cv_check_cxxflags___std_cpp2b" = xyes
+then :
+  CXXExpLanguage=23
+ ExpFlag20=-std=c++2b
+
+else $as_nop
+  :
+fi
+
 
         #CXX_STD_FLAG
         #CXXSTDVER
 
-        if test $minLangFeature -le $CXXMaxLanguage
+        if test $askedLangFeature -le $CXXMaxLanguage
 then :
 
-                if test $maxLangFeature -le $CXXMaxLanguage
-then :
-  CXXSTDVER=$maxLangFeature
+                CXXSTDVER=$askedLangFeature
 
-else $as_nop
-  CXXSTDVER=$CXXMaxLanguage
-
-
-fi
                 CXX_STD_FLAG=$(eval echo "\${StdFlag${CXXSTDVER}}")
 
 
 else $as_nop
-  if test $minLangFeature -le $CXXExpLanguage
+  if test $askedLangFeature -le $CXXExpLanguage
 then :
 
-                    if test $maxLangFeature -le $CXXExpLanguage
-then :
-  CXXSTDVER=$maxLangFeature
+                    CXXSTDVER=$askedLangFeature
 
-else $as_nop
-  CXXSTDVER=$CXXExpLanguage
-
-
-fi
                     CXX_STD_FLAG=$(eval echo "\${ExpFlag${CXXSTDVER}}")
 
 
 else $as_nop
   as_fn_error 1 "
 
-Error: Need C++${minLangFeature} but the compiler only supports ${CXXMaxLanguage} (Experimental ${CXXExpLanguage})
+Error: Need C++${askedLangFeature} but the compiler only supports ${CXXMaxLanguage} (Experimental ${CXXExpLanguage})
 
                     " "$LINENO" 5
 
@@ -17994,20 +18273,6 @@ CXXDEPMODE=depmode=$am_cv_CXX_dependencies_compiler_type
 else
   am__fastdepCXX_TRUE='#'
   am__fastdepCXX_FALSE=
-fi
-
-
-# Variables for tags utilities; see am/tags.am
-if test -z "$CTAGS"; then
-  CTAGS=ctags
-fi
-
-if test -z "$ETAGS"; then
-  ETAGS=etags
-fi
-
-if test -z "$CSCOPE"; then
-  CSCOPE=cscope
 fi
 
 
