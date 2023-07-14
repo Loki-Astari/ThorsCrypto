@@ -1,49 +1,15 @@
-AC_INIT([ThorsCrypto], [0.1], [Loki.Astari@gmail.com])
+AC_INIT([ThorsCrypto], [3.0], [Loki.Astari+ThorsCrypto@gmail.com])
 AC_PREREQ([2.65])
 
-# Set up the build system
-if [[ ! -e build/Notes ]]; then
-    git submodule init
-    git submodule update
-fi
-ln -s .build build | echo "Build Already Setup"
-AC_CONFIG_MACRO_DIR([.build/autotools/m4])
-AC_CONFIG_AUX_DIR([.build/autotools/build])
-AX_THOR_FUNC_BUILD
+AC_CONFIG_MACRO_DIR([build/autotools/m4])
+AC_CONFIG_AUX_DIR([build/autotools/build])
 
+AX_THOR_FUNC_INIT_BUILD([ThorsCrypto], [17], [src/ThorsCrypto/scram.h])
 
-AC_CONFIG_SRCDIR([src/ThorsCrypto/scram.h])
-AC_PROG_CXX
-AX_THOR_PROG_COV
+AX_THOR_CHECK_USE_CRYPTO
 
-AX_THOR_LIB_SELECT
-
-AC_LANG_PUSH([C++])
-AX_CHECK_COMPILE_FLAG([-ansi], [AC_SUBST([CXXFLAGS], [" -ansi"])])
-# Check what version of the C++ language is supported
-AC_LANG_POP([C++])
-
-AX_THOR_FUNC_LANG_FLAG(17)
-
-# Find the code coverage tool.
-# All the testing will depend on this.
-AX_THOR_FUNC_USE_CRYPTO
-
-# Add support for shared libraries.
 LT_INIT
 
+AX_THOR_FUNC_TERM_BUILD([CRYPTO], [src/ThorsCrypto/ThorsCryptoConfig.h])
 
-#
-# Add your defintions in here.
-# Note there are some predefined macros in build/autotools/m4/
-
-
-
-# Build all the Makefiles and configuration files.
-# Used by ThorMaker
-# Note: you can push the config file to sub directories in the AC_CONFIG_HEADERS macro (see example)
-# Note: Local Make variables should be placed in Makefile.config.in
-AM_INIT_AUTOMAKE([foreign])
-AC_CONFIG_HEADERS([config.h src/ThorsCrypto/ThorsCryptoConfig.h:config.h.in])
-AC_CONFIG_FILES([Makefile.extra Makefile.config:build/autotools/build/Makefile.config.in:Makefile.config.in])
 AC_OUTPUT

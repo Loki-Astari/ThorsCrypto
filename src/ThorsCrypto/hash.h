@@ -10,9 +10,30 @@
 #else
 #include <openssl/sha.h>
 #include <openssl/md5.h>
-#define THOR_MD5(data, len, dst)        MD5(data, len, dst)
-#define THOR_SHA1(data, len, dst)       SHA1(data, len, dst)
-#define THOR_SHA256(data, len, dst)     SHA256(data, len, dst)
+#define THOR_MD5(data, len, dst)        \
+do {                                    \
+    MD5_CTX     ctx;                    \
+    MD5_Init(&ctx);                     \
+    MD5_Update(&ctx, data, len);        \
+    MD5_Final(dst, &ctx);               \
+}                                       \
+while (false)
+#define THOR_SHA1(data, len, dst)       \
+do {                                    \
+    SHA_CTX     ctx;                    \
+    SHA1_Init(&ctx);                    \
+    SHA1_Update(&ctx, data, len);       \
+    SHA1_Final(dst, &ctx);              \
+}                                       \
+while (false)
+#define THOR_SHA256(data, len, dst)     \
+do {                                    \
+    SHA256_CTX     ctx;                 \
+    SHA256_Init(&ctx);                  \
+    SHA256_Update(&ctx, data, len);     \
+    SHA256_Final(dst, &ctx);            \
+}                                       \
+while (false)
 #endif
 
 #include <string>
