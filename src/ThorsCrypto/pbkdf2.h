@@ -19,9 +19,7 @@ struct Pbkdf2
 
     static void hash(std::string const& password, std::string const& salt, long iter, DigestStore& digest)
     {
-#pragma vera-pushoff
         using namespace std::string_literals;
-#pragma vera-pop
         PRF             prf;
         DigestStore     tmp;
 
