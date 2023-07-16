@@ -16,7 +16,7 @@ TEST(hmacTest, StructSHA1_QuickBrownFox)
     ASSERT_EQ(output.view(), expected);
 }
 
-TEST(hmacsha1Test, StructSHA256_QuickBrownFox)
+TEST(hmacTest, StructSHA256_QuickBrownFox)
 {
     std::string key     = "key";
     std::string data    = "The quick brown fox jumps over the lazy dog";

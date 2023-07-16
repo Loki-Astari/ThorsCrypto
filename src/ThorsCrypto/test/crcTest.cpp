@@ -7,7 +7,7 @@ using ThorsAnvil::Crypto::CRC32C_Checksum;
 
 
 
-TEST(UtilCRCTest, NumberTest)
+TEST(crcTest, NumberTest)
 {
     std::string data = "123456789";
 
@@ -17,7 +17,7 @@ TEST(UtilCRCTest, NumberTest)
     EXPECT_EQ(static_cast<uint32_t>(0xCBF43926ul), crc.checksum());
 }
 
-TEST(UtilCRCTest, EmptyString)
+TEST(crcTest, EmptyString)
 {
     std::string data = "";
 
@@ -27,7 +27,7 @@ TEST(UtilCRCTest, EmptyString)
     EXPECT_EQ(static_cast<uint32_t>(0x00000000ul), crc.checksum());
 }
 
-TEST(UtilCRCTest, SingleSpace)
+TEST(crcTest, SingleSpace)
 {
     std::string data = " ";
 
@@ -37,7 +37,7 @@ TEST(UtilCRCTest, SingleSpace)
     EXPECT_EQ(static_cast<uint32_t>(0xE96CCF45ul), crc.checksum());
 }
 
-TEST(UtilCRCTest, QuickBrownFox)
+TEST(crcTest, QuickBrownFox)
 {
     std::string data = "The quick brown fox jumps over the lazy dog";
 
@@ -47,7 +47,7 @@ TEST(UtilCRCTest, QuickBrownFox)
     EXPECT_EQ(static_cast<uint32_t>(0x414FA339ul), crc.checksum());
 }
 
-TEST(UtilCRCTest, ShortString)
+TEST(crcTest, ShortString)
 {
     std::string data = "various CRC algorithms input data";
 
@@ -57,7 +57,7 @@ TEST(UtilCRCTest, ShortString)
     EXPECT_EQ(static_cast<uint32_t>(0x9BD366AEul), crc.checksum());
 }
 
-TEST(UtilCRCTest, CRC32C_AllZero)
+TEST(crcTest, CRC32C_AllZero)
 {
     std::string data = 
         "\x00\x00\x00\x00\x00\x00\x00\x00"
@@ -71,7 +71,7 @@ TEST(UtilCRCTest, CRC32C_AllZero)
     EXPECT_EQ(static_cast<uint32_t>(0x8a9136aa), crc.checksum());
 }
 
-TEST(UtilCRCTest, CRC32C_All255)
+TEST(crcTest, CRC32C_All255)
 {
     std::string data = 
         "\xff\xff\xff\xff\xff\xff\xff\xff"
@@ -85,7 +85,7 @@ TEST(UtilCRCTest, CRC32C_All255)
     EXPECT_EQ(static_cast<uint32_t>(0x62a8ab43), crc.checksum());
 }
 
-TEST(UtilCRCTest, CRC32C_Incrementing)
+TEST(crcTest, CRC32C_Incrementing)
 {
     std::string data = 
         "\x00\x01\x02\x03\x04\x05\x06\x07"
@@ -99,7 +99,7 @@ TEST(UtilCRCTest, CRC32C_Incrementing)
     EXPECT_EQ(static_cast<uint32_t>(0x46dd794e), crc.checksum());
 }
 
-TEST(UtilCRCTest, CRC32C_Decrementing)
+TEST(crcTest, CRC32C_Decrementing)
 {
     std::string data = 
         "\x1f\x1e\x1d\x1c\x1b\x1a\x19\x18"

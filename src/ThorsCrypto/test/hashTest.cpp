@@ -1,6 +1,7 @@
 
 #include <gtest/gtest.h>
 #include "hash.h"
+#include "md5.h"
 
 using namespace ThorsAnvil::Crypto;
 
@@ -45,8 +46,11 @@ TEST(hashTest, MD5TestCreate)
     std::string expected    = "\x5b\x56\xf4\x0f\x88\x28\x70\x1f\x97\xfa\x45\x11\xdd\xcd\x25\xfb";
     EXPECT_EQ(output.view(), expected);
 
-    //std::string result = ThorsAnvil::DB::Util::md5("TestString");
-    //ASSERT_EQ("5B56F40F8828701F97FA4511DDCD25FB", result);
+    using namespace std::literals;
+    MD5       test;
+    std::stringstream result;
+    result << test.digest("TestString");
+    ASSERT_EQ("5b56f40f8828701f97fa4511ddcd25fb", result.str());
 }
 TEST(hashTest, MD5TestCreateFromObjectEmpty)
 {
@@ -58,8 +62,11 @@ TEST(hashTest, MD5TestCreateFromObjectEmpty)
     std::string expected    = "\x79\x19\xA4\x8C\xA7\xC5\x7E\xEA\x99\x5F\xBC\xB0\x0A\xB3\x93\x6B";
     EXPECT_EQ(output.view(), expected);
 
-    //ThorsAnvil::DB::Util::MD5       test;
-    //ASSERT_EQ("7919A48CA7C57EEA995FBCB00AB3936B", result);
+    using namespace std::literals;
+    MD5       test;
+    std::stringstream result;
+    result << test.digest("JustString");
+    ASSERT_EQ("7919a48ca7c57eea995fbcb00ab3936b", result.str());
 }
 TEST(hashTest, MD5TestCreateHexDigest)
 {
@@ -69,8 +76,11 @@ TEST(hashTest, MD5TestCreateHexDigest)
     std::string expected    = "5b56f40f8828701f97fa4511ddcd25fb";
     EXPECT_EQ(output, expected);
 
-    //std::string result = ThorsAnvil::DB::Util::md5("TestString");
-    //ASSERT_EQ("5B56F40F8828701F97FA4511DDCD25FB", result);
+    using namespace std::literals;
+    MD5       test;
+    std::stringstream result;
+    result << test.digest("TestString");
+    ASSERT_EQ("5b56f40f8828701f97fa4511ddcd25fb", result.str());
 }
 TEST(hashTest, MD5TestCreateFromObjectEmptyHexDigest)
 {
@@ -80,40 +90,54 @@ TEST(hashTest, MD5TestCreateFromObjectEmptyHexDigest)
     std::string expected    = "7919a48ca7c57eea995fbcb00ab3936b";
     EXPECT_EQ(output, expected);
 
-    //ThorsAnvil::DB::Util::MD5       test;
-    //ASSERT_EQ("7919A48CA7C57EEA995FBCB00AB3936B", result);
+    using namespace std::literals;
+    Digest<Md5>        hash;
+    Md5::hash("JustString"s, hash);
+    char expectedResult[] = "\x79\x19\xA4\x8C\xA7\xC5\x7E\xEA\x99\x5F\xBC\xB0\x0A\xB3\x93\x6B";
+    ASSERT_EQ(hash.view(), std::string_view(expectedResult, std::size(expectedResult) - 1));
 }
-#if 0
-TEST(MD5Test, CreateFromObjectTestString)
+TEST(hashTest, CreateFromObjectTestString)
 {
-    std::string input1 = "Init";
+    std::string input = "Init";
     Digest<Md5>        output;
 
     Md5::hash(input, output);
-    Digest<Md5>        output;
-    Md5:::
-
 
     std::string expected    = "\x95\xB1\x9F\x77\x39\xB0\xB7\xEA\x7D\x6B\x07\x58\x6B\xE5\x4F\x36";
     EXPECT_EQ(output.view(), expected);
-    //ThorsAnvil::DB::Util::MD5       test("Init");
-    //test.update("WithInit", 10);
-    //ASSERT_EQ("95B19F7739B0B7EA7D6B07586BE54F36", result);
+
+    using namespace std::literals;
+    MD5       test;
+    std::stringstream result;
+    result << test.digest("Init");
+    ASSERT_EQ("95b19f7739b0b7ea7d6b07586be54f36", result.str());
 }
-TEST(MD5Test, CreateFromObjectTestStringStream)
+TEST(hashTest, CreateFromObjectTestStringStream)
 {
-    test.update("WithInit", 10);
-    test.finalize();
-    std::stringstream resultStream;
-    resultStream << test;
+    using namespace std::literals;
+
+    MD5                 test;
+    std::stringstream   resultStream;
+    resultStream << test.digest("WithInit");
+
     std::string result = resultStream.str();
     std::transform(std::begin(result), std::end(result), std::begin(result), [](char x){return ::toupper(x);});
-    ASSERT_EQ("95B19F7739B0B7EA7D6B07586BE54F36", result);
+    ASSERT_EQ("8034432759B1BE546653F6FED5B17AE9", result);
+
+    Digest<Md5>        output;
+    Md5::hash("WithInit"s, output);
+    ASSERT_EQ(output.view(), "\x80\x34\x43\x27\x59\xB1\xBE\x54\x66\x53\xF6\xFE\xD5\xB1\x7A\xE9");
 }
-TEST(MD5Test, NotFinalized)
+TEST(hashTest, NotFinalized)
 {
-    ThorsAnvil::DB::Util::MD5       test;
-    std::string result = test.hexdigest();
-    ASSERT_EQ("", result);
+    using namespace std::literals;
+    Digest<Md5>        output;
+    Md5::hash(""s, output);
+    char expectedResult[] = "\xd4\x1d\x8c\xd9\x8f\x00\xb2\x04\xe9\x80\x09\x98\xec\xf8\x42\x7e";
+    ASSERT_EQ(output.view(), std::string_view(expectedResult, std::size(expectedResult) - 1));
+
+    MD5       test;
+    std::stringstream result;
+    result << test.digest("");
+    ASSERT_EQ("d41d8cd98f00b204e9800998ecf8427e", result.str());
 }
-#endif
