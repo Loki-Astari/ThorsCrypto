@@ -1,6 +1,7 @@
-#ifndef THORS_ANVIL_CRYPTO_HMAC_H
-#define THORS_ANVIL_CRYPTO_HMAC_H
+#ifndef THORSANVIL_CRYPTO_HMAC_H
+#define THORSANVIL_CRYPTO_HMAC_H
 
+#include "ThorsCryptoConfig.h"
 #include "hash.h"
 
 // HMAC: Keyed-Hashing for Message Authentication RFC-2104

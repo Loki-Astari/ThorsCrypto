@@ -1,6 +1,7 @@
 #ifndef THORSANVIL_CRYPTO_SCRAM_H
 #define THORSANVIL_CRYPTO_SCRAM_H
 
+#include "ThorsCryptoConfig.h"
 #include "hash.h"
 #include "hmac.h"
 #include "pbkdf2.h"

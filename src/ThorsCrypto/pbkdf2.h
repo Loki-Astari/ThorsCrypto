@@ -1,6 +1,7 @@
-#ifndef THORS_ANVIL_CRYPTO_PBKDF2_H
-#define THORS_ANVIL_CRYPTO_PBKDF2_H
+#ifndef THORSANVIL_CRYPTO_PBKDF2_H
+#define THORSANVIL_CRYPTO_PBKDF2_H
 
+#include "ThorsCryptoConfig.h"
 #include "hmac.h"
 #include <string>
 

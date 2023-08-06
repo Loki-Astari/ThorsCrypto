@@ -1,6 +1,7 @@
-#ifndef THORS_ANVIL_CRYPTO_HASH_H
-#define THORS_ANVIL_CRYPTO_HASH_H
+#ifndef THORSANVIL_CRYPTO_HASH_H
+#define THORSANVIL_CRYPTO_HASH_H
 
+#include "ThorsCryptoConfig.h"
 #ifdef  __APPLE__
 #define COMMON_DIGEST_FOR_OPENSSL
 #include <CommonCrypto/CommonDigest.h>

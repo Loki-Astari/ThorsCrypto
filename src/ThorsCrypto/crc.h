@@ -1,6 +1,7 @@
-#ifndef THORS_ANVIL_CRYPTO_CRC_H
-#define THORS_ANVIL_CRYPTO_CRC_H
+#ifndef THORSANVIL_CRYPTO_CRC_H
+#define THORSANVIL_CRYPTO_CRC_H
 
+#include "ThorsCryptoConfig.h"
 #include <cstdint>
 
 namespace ThorsAnvil::Crypto

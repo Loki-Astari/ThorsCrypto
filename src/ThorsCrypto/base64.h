@@ -1,6 +1,7 @@
-#ifndef THORS_ANVIL_CRYPTO_BASE_H
-#define THORS_ANVIL_CRYPTO_BASE_H
+#ifndef THORSANVIL_CRYPTO_BASE_H
+#define THORSANVIL_CRYPTO_BASE_H
 
+#include "ThorsCryptoConfig.h"
 #include "ThorsLogging/ThorsLogging.h"
 
 namespace ThorsAnvil::Crypto

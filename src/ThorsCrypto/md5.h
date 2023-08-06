@@ -1,6 +1,7 @@
 #ifndef THORSANIL_CRYPTO_MD5_H
 #define THORSANIL_CRYPTO_MD5_H
 
+#include "ThorsCryptoConfig.h"
 // Based on RFC 1321
 // https://www.ietf.org/rfc/rfc1321.txt
 // 1992
