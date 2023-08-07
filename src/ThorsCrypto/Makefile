@@ -11,7 +11,7 @@ CRYPTO_WARNINGS_MINGW64_NT	= -Wno-deprecated-declarations
 CRYPTO_WARNINGS_MSYS_NT		= -Wno-deprecated-declarations
 CRYPTO_WARNINGS_Linux		= -Wno-missing-braces
 CRYPTO_WARNINGS				= $(CRYPTO_WARNINGS_$(PLATFORM))
-FILE_WARNING_FLAGS			+= $(CRYPTO_WARNINGS)
+FILE_WARNING_FLAGS			+= $(CRYPTO_WARNINGS) -Wno-sometimes-uninitialized
 
 include $(THORSANVIL_ROOT)/build/tools/Makefile
 
