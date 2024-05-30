@@ -752,6 +752,7 @@ VERATOOL
 TestVera
 COV
 DefaultLinkDir
+THOR_PACKAGE_NAME
 target_alias
 host_alias
 build_alias
@@ -3566,6 +3567,11 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
     export BUILDING_ThorsCrypto=1
 
+printf "%s\n" "#define THOR_PACKAGE_NAME ThorsCrypto" >>confdefs.h
+
+    THOR_PACKAGE_NAME=ThorsCrypto
+
+
     ac_ext=cpp
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
@@ -4099,7 +4105,14 @@ then :
 fi
 
 
-    askedLangFeature=17
+
+    if test "x" == "x"
+then :
+  askedLangFeature=17
+else $as_nop
+  askedLangFeature=
+
+fi
     if test "x${with_standard_version}" != "x"
 then :
 
@@ -4857,6 +4870,10 @@ fi
 
 
 
+    remove=""
+    libs="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    libs=${libs//"${remove}"/}
+    echo "Libs: ${libs}"
 
 
 # Check whether --with-thorserialize-root was given.
@@ -4898,8 +4915,8 @@ printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
 
 fi
-    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
-    ThorSerialize_ROOT_LIB="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    echo "Setting: ThorSerialize_ROOT_LIB TO ${libs}"
+    ThorSerialize_ROOT_LIB="${libs}"
 
 
 
@@ -4955,8 +4972,8 @@ printf "%s\n" "#define HAVE_THORSSERIALIZER 1" >>confdefs.h
 
 
 fi
-    echo "Setting: ThorSerialize_ROOT_LIB TO ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
-    ThorSerialize_ROOT_LIB="ThorSerialize ThorsSocket ThorsStorage ThorsLogging"
+    echo "Setting: ThorSerialize_ROOT_LIB TO ${libs}"
+    ThorSerialize_ROOT_LIB="${libs}"
 
 
 
@@ -17861,6 +17878,11 @@ fi
             popd
 
     export BUILDING_${third}=1
+
+printf "%s\n" "#define THOR_PACKAGE_NAME \${third}" >>confdefs.h
+
+    THOR_PACKAGE_NAME=${third}
+
 
         done
         popd
