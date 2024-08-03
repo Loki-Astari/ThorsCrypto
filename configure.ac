@@ -14,6 +14,6 @@ AX_THOR_CHECK_USE_THORS_SERIALIZE
 
 LT_INIT
 
-AX_THOR_FUNC_TERM_BUILD([CRYPTO], [src/ThorsCrypto/ThorsCryptoConfig.h])
+AX_THOR_FUNC_TERM_BUILD([CRYPTO], [src/ThorsCrypto/ThorsCryptoConfig.h:config.h.in])
 
 AC_OUTPUT
