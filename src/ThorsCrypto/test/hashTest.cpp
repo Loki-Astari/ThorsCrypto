@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include "hash.h"
 #include "md5.h"
+#include  <algorithm>
 
 namespace TC = ThorsAnvil::Crypto;
 
