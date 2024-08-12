@@ -27,7 +27,7 @@ Server key (hex): 0fe09258b3ac852ba502cc62ba903eaacdbf7d31
 Server signature (hex): ae617da6a57c4bbb2e0286568dae1d251905b0a4
 Client final message: c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,p=v0X8v3Bz2T0CJGbJQyF0X+HI4Ts=
 Server final message: v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
-Server's server signature (hex): ae617da6a57c4bbb2e0286568dae1d251905b0a4
+Servers server signature (hex): ae617da6a57c4bbb2e0286568dae1d251905b0a4
 #endif
 
 TEST(scramTest, SimpleTeat)

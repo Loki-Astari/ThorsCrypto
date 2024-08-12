@@ -709,6 +709,7 @@ ThorSerialize_ROOT_DIR
 ThorSerializeHeaderOnly_ROOT_DIR
 crypto_ROOT_LIB
 crypto_ROOT_DIR
+THOR_CONAN_ENABLE
 UNZIP
 CXX_STD_FLAG
 CXXSTDVER
@@ -793,6 +794,7 @@ enable_vera
 enable_colour
 enable_dark_mode
 with_standard_version
+enable_test_with_conan
 with_crypto_root
 with_thorserialize_header_only_root
 with_thorserialize_root
@@ -1453,6 +1455,10 @@ Optional Features:
 
   --enable-dark-mode      If your background is black some text that was grey
                           is turned yellow
+
+  --enable-test-with-conan
+                          Set the Makefile variable "THOR_ENABLE_CONAN". This
+                          is used by the standard Makefiles to add.
 
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
@@ -4728,6 +4734,38 @@ test -n "$UNZIP" || UNZIP=":"
     pushd build/third
     ./setup "${CXX}  ${CXX_STD_FLAG}" || as_fn_error $? "Failed to set up the test utilities" "$LINENO" 5
     popd
+
+
+
+
+
+    # Check whether --enable-test-with-conan was given.
+if test ${enable_test_with_conan+y}
+then :
+  enableval=$enable_test_with_conan;
+fi
+
+
+    if test "x${enable_test_with_conan}" == "xyes"
+then :
+
+
+printf "%s\n" "#define THOR_CONAN 1" >>confdefs.h
+
+            THOR_CONAN_ENABLE=CONAN
+
+            subconfigure="${subconfigure} --enable-test-with-conan";
+
+else case e in #(
+  e)
+
+printf "%s\n" "#define THOR_CONAN 0" >>confdefs.h
+
+
+
+     ;;
+esac
+fi
 
 
 

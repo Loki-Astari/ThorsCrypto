@@ -1,4 +1,5 @@
 
+THOR_CONAN_ENABLE=@THOR_CONAN_ENABLE@
 
 crypto_ROOT_DIR=@crypto_ROOT_DIR@
 crypto_ROOT_LIB=@crypto_ROOT_LIB@
