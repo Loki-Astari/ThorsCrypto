@@ -117,7 +117,7 @@ class ScramClient: public ScramBase<Hi, HMAC, H>
 {
     using Base = ScramBase<Hi, HMAC, H>;
     public:
-        ScramClient(std::string const& userName, NonceGenerator&& nonceGenerator = [](){return "fyko+d2lbbFgONRv9qkxdawL";})
+        ScramClient(std::string const& userName, NonceGenerator&& nonceGenerator)
             : Base(std::string("n=") + userName + ",r=" + nonceGenerator(), std::move(nonceGenerator))
         {
 #if defined(DEBUG)
