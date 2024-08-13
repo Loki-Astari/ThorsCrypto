@@ -6,6 +6,9 @@
 #include "hmac.h"
 #include "pbkdf2.h"
 #include "base64.h"
+#if defined(DEBUG)
+#include <iostream>
+#endif
 
 // RFC-5801 Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms
 
@@ -116,18 +119,33 @@ class ScramClient: public ScramBase<Hi, HMAC, H>
     public:
         ScramClient(std::string const& userName, NonceGenerator&& nonceGenerator = [](){return "fyko+d2lbbFgONRv9qkxdawL";})
             : Base(std::string("n=") + userName + ",r=" + nonceGenerator(), std::move(nonceGenerator))
-        {}
+        {
+#if defined(DEBUG)
+            std::cerr << "ScramClient: user:  >" << userName << "<\n";
+            std::cerr << "ScramClient: Nonce: >fyko+d2lbbFgONRv9qkxdawL< Check >" << this->generateNonce() << "<\n";;
+#endif
+        }
         std::string getFirstMessage()
         {
             using namespace std::literals;
-            return "n,,"s + Base::getClientFirstMessageBare();;
+            std::string fm = "n,,"s + Base::getClientFirstMessageBare();
+#if defined(DEBUG)
+            std::cerr << "ScramClient: First: >" << fm << "<\n";
+#endif
+            return fm;
         }
         std::string getProofMessage(std::string const& password, std::string const& sfm)
         {
             using namespace std::literals;
             Base::setServiceFirstMessage(sfm);
             Base::calculateClientScramHash(password);
-            return Base::getClientFinalMessageWithoutProof() + ",p="s + Base::getClientProof();
+            std::string prof = Base::getClientFinalMessageWithoutProof() + ",p="s + Base::getClientProof();
+#if defined(DEBUG)
+            std::cerr << "ScramClient: pass:  >" << password << "<\n";
+            std::cerr << "ScramClient: sfm:   >" << sfm << "<\n";
+            std::cerr << "ScramClient: Proof: >" << prof << "<\n";
+#endif
+            return prof;
         }
         bool verifyServer(std::string const& serverProof)
         {
@@ -151,22 +169,41 @@ class ScramServer: public ScramBase<Hi, HMAC, H>
             : Base(clientFirstMessage.substr(3), std::move(nonceGenerator))
             , iterationCount(iterationCount)
             , dbInfo(std::move(dbInfo))
-        {}
+        {
+#if defined(DEBUG)
+            std::cerr << "ScramServer: C First: >" << clientFirstMessage << "<\n";
+            std::cerr << "ScramServer: Iter:    >" << iterationCount << "\n";
+            std::cerr << "ScramServer: Nonce:   >3rfcNHYJY1ZVvWVs7j< Check >" << this->generateNonce() << "<\n";;
+#endif
+        }
         std::string getFirstMessage()
         {
             using namespace std::literals;
             std::string message = "r="s + Base::getClientNonce() + Base::generateNonce() + ",s="s + dbInfo(DBInfoType::Salt, Base::getUserFromMessage()) + ",i="s + std::to_string(iterationCount);
             Base::setServiceFirstMessage(message);
+#if defined(DEBUG)
+            std::cerr << "ScramServer: First: >" << message << "<\n";
+#endif
             return message;
         }
         std::string getProofMessage(std::string const& clientProof)
         {
             using namespace std::literals;
+#if defined(DEBUG)
+            std::cerr << "ScramServer: C Prof:  >" << clientProof << "<\n";
+#endif
             Base::calculateClientScramHash(Base::normalize(dbInfo(DBInfoType::Password, Base::getUserFromMessage())));
             if (Base::getClientProof() == Base::getProofFromClinet(clientProof)  && Base::validateNonce(clientProof))
             {
-                return "v="s + Base::getServerSignature();
+                std::string prof = "v="s + Base::getServerSignature();
+#if defined(DEBUG)
+                std::cerr << "ScramServer: C Prrof: >" << prof << "<\n";
+#endif
+                return prof;
             }
+#if defined(DEBUG)
+            std::cerr << "ScramServer: Proof:   >XXXXXXX<\n";
+#endif
             return "";
         }
 };
