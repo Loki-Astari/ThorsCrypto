@@ -37,7 +37,10 @@ TEST(scramTest, SimpleTeat)
     std::string clientFirstMessage = client.getFirstMessage();
     EXPECT_EQ(clientFirstMessage, "n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL");
 
-    ScramServerSha1     server(clientFirstMessage);
+    ScramServerSha1     server( clientFirstMessage,
+                                4096,
+                                [](){return "3rfcNHYJY1ZVvWVs7j";},
+                                [](DBInfoType type, std::string const& /*user*/){return type == DBInfoType::Password ? "pencil" : "QSXCR+Q6sek8bf92";});
     std::string serverFirstMessage = server.getFirstMessage();
     EXPECT_EQ(serverFirstMessage, "r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92,i=4096");
 

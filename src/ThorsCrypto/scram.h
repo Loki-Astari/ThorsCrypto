@@ -163,9 +163,9 @@ class ScramServer: public ScramBase<Hi, HMAC, H>
 
     public:
         ScramServer(std::string const& clientFirstMessage,
-                    std::size_t iterationCount = 4096,
-                    NonceGenerator&& nonceGenerator = [](){return "3rfcNHYJY1ZVvWVs7j";},
-                    DBInfoAccess&&   dbInfo         = [](DBInfoType type, std::string const& /*user*/){return type == DBInfoType::Password ? "pencil" : "QSXCR+Q6sek8bf92";})
+                    std::size_t iterationCount,
+                    NonceGenerator&& nonceGenerator,
+                    DBInfoAccess&&   dbInfo)
             : Base(clientFirstMessage.substr(3), std::move(nonceGenerator))
             , iterationCount(iterationCount)
             , dbInfo(std::move(dbInfo))
