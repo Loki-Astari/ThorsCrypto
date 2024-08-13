@@ -30,7 +30,7 @@ Server final message: v=rmF9pqV8S7suAoZWja4dJRkFsKQ=
 Servers server signature (hex): ae617da6a57c4bbb2e0286568dae1d251905b0a4
 #endif
 
-TEST(scramTest, SimpleTeat)
+TEST(scramTest, Client1)
 {
     ScramClientSha1     client("user", [](){return "fyko+d2lbbFgONRv9qkxdawL";});
 
@@ -49,6 +49,30 @@ TEST(scramTest, SimpleTeat)
 
     std::string serverProof        = server.getProofMessage(clientProof);
     EXPECT_EQ(serverProof, "v=rmF9pqV8S7suAoZWja4dJRkFsKQ=");
+
+    EXPECT_EQ(true, client.verifyServer(serverProof));
+
+}
+
+TEST(scramTest, Client256)
+{
+    ScramClientSha256     client("user", [](){return "fyko+d2lbbFgONRv9qkxdawL";});
+
+    std::string clientFirstMessage = client.getFirstMessage();
+    EXPECT_EQ(clientFirstMessage, "n,,n=user,r=fyko+d2lbbFgONRv9qkxdawL");
+
+    ScramServerSha256     server( clientFirstMessage,
+                                4096,
+                                [](){return "3rfcNHYJY1ZVvWVs7j";},
+                                [](DBInfoType type, std::string const& /*user*/){return type == DBInfoType::Password ? "pencil" : "QSXCR+Q6sek8bf92";});
+    std::string serverFirstMessage = server.getFirstMessage();
+    EXPECT_EQ(serverFirstMessage, "r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,s=QSXCR+Q6sek8bf92,i=4096");
+
+    std::string clientProof        = client.getProofMessage("pencil", serverFirstMessage);
+    EXPECT_EQ(clientProof, "c=biws,r=fyko+d2lbbFgONRv9qkxdawL3rfcNHYJY1ZVvWVs7j,p=qQRLRHGPDGjB+7iVAE7NNi5xEoHKHuLCHPNQ8BTmvds=");
+
+    std::string serverProof        = server.getProofMessage(clientProof);
+    EXPECT_EQ(serverProof, "v=XKW6VuW1FANROQabnJBz1KaeCnQL/HZByQtX/iU+o30=");
 
     EXPECT_EQ(true, client.verifyServer(serverProof));
 
