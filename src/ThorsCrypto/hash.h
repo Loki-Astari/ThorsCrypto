@@ -63,7 +63,7 @@ class DigestStoreBase
 
         operator DigestPtr()                        {return &data[0];}
         std::string_view  view()                    {return std::string_view(reinterpret_cast<char const*>(&data[0]), std::size(data));}
-        Byte&             operator[](std::size_t i) {return data[i];}
+        Byte&             operator[](std::size_t i) {return data[i % size];}
         iterator          begin()                   {return std::begin(data);}
         iterator          end()                     {return std::end(data);}
 };
