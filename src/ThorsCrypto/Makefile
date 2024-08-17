@@ -5,6 +5,7 @@ TARGET						= ThorsCrypto.head
 NAMESPACE					= ThorsAnvil::Crypto
 
 LDLIBS_EXTERN_BUILD			= crypto ThorSerialize
+LINK_LIBS					+= ThorsLogging
 
 CRYPTO_WARNINGS_Darwin		= -Wno-deprecated-declarations
 CRYPTO_WARNINGS_MINGW64_NT	= -Wno-deprecated-declarations
