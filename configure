@@ -5162,10 +5162,10 @@ fi
 
 
 
-    if [ "" == "" ]; then
+    if [ "ThorsLogging" == "" ]; then
         libs="ThorSerialize ThorsSocket ThorsStorage ThorsLogging ThorsMongo"
     else
-        libs=""
+        libs="ThorsLogging"
     fi
 
     echo "Libs: ${libs}"

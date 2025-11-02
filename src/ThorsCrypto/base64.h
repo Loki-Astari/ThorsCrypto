@@ -62,7 +62,8 @@ class Base64DecodeIterator
                 unsigned char b64 = convert[tmp & 0x7F];
                 if (b64 == 0x8F || tmp > 0x7F)
                 {
-                    ThorsLogAndThrowDebug("ThorsAnvil::Crypto::Base64DecodeIterator",
+                    ThorsLogAndThrowDebug(std::runtime_error,
+                                          "ThorsAnvil::Crypto::Base64DecodeIterator",
                                           "operator*()",
                                           "invalid input");
                 }
