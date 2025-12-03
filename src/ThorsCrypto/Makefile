@@ -1,4 +1,4 @@
-
+CONFIG_NAME					= ThorsCrypto
 THORSANVIL_ROOT				?= $(realpath ../../)
 
 TARGET						= ThorsCrypto.head
