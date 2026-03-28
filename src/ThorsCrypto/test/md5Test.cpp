@@ -1,6 +1,5 @@
 #include <gtest/gtest.h>
 #include "md5.h"
-#include <iostream>
 
 using ThorsAnvil::Crypto::MD5;
 using ThorsAnvil::Crypto::Hash;
