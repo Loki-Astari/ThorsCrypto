@@ -145,7 +145,8 @@ class ScramClient
         }
         bool validateServer(std::string const& serverFinalMessage)
         {
-            return serverSignature64 == ScramUtil::getMessageBody("v=", serverFinalMessage);
+            std::string     vFlag = ScramUtil::getMessageBody("v=", serverFinalMessage);
+            return std::size(serverSignature64) == std::size(vFlag) && CRYPTO_memcmp(serverSignature64.c_str(), vFlag.c_str(), std::size(serverSignature64)) == 0;
         }
 };
 
