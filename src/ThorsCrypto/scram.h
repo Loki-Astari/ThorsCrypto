@@ -6,7 +6,8 @@
 #include "hmac.h"
 #include "pbkdf2.h"
 #include "base64.h"
-#include <random>
+#include "ThorsLogging/ThorsLogging.h"
+#include <openssl/rand.h>
 
 // RFC-5801 Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms
 
@@ -69,23 +70,17 @@ struct ScramUtil
     }
     static std::string randomNonce()
     {
-        using UniformDist = std::uniform_int_distribution<std::uint32_t>;
-        static std::random_device       device;
-        static std::mt19937             generator(device());
-        static UniformDist              dist(0, 0xFFFFFFFF);
-        static std::mutex               lock;
-
-        std::lock_guard<std::mutex>     guard(lock);
-
-        std::string result;
-        for (int loop = 0; loop < 4; ++loop)
+        std::uint8_t buf[16];
+        if (RAND_bytes(buf, sizeof(buf)) != 1)
         {
-            std::uint32_t   rand = dist(generator);
-            char*           b    = reinterpret_cast<char*>(&rand);
-            char*           e    = b + 4;
-            result.append(make_encode64(b), make_encode64(e));
+            ThorsLogAndThrowError(std::runtime_error,
+                                      "ThorsAnvil::Crypto::ScramUtil",
+                                      "randomNonce",
+                                      "RAND_bytes failed");
         }
-        return result;
+        char* b = reinterpret_cast<char*>(buf);
+        char* e = b + sizeof(buf);
+        return std::string(make_encode64(b), make_encode64(e));
     }
     using CalcResp = std::tuple<std::string, std::string, std::string>;
     template<typename Hi, typename HMAC, typename H, std::size_t S>
