@@ -2,6 +2,7 @@
 #define THORSANVIL_CRYPTO_SCRAM_H
 
 #include "ThorsCryptoConfig.h"
+#include "cryptstring.h"
 #include "hash.h"
 #include "hmac.h"
 #include "pbkdf2.h"
@@ -17,7 +18,7 @@ namespace ThorsAnvil::Crypto
 template<typename Hi, typename HMAC, typename H, std::size_t S>
 struct DBInfo
 {
-    std::string&    saltBase64;
+    String&         saltBase64;
     Digest<Hi>&     saltedPassword;
     Digest<H>&      storedKey;
     Digest<HMAC>&   serverKey;
@@ -28,19 +29,19 @@ struct DBInfo
 template<typename Hi, typename HMAC, typename H, std::size_t S>
 class ScramMechanism
 {
-    std::string normalize(std::string const& password)  {return password;}
-    std::string     saltBase64;
+    std::string_view normalize(std::string_view password)  {return password;}
+    String          saltBase64;
     Digest<Hi>      saltedPassword;
     Digest<H>       storedKey;
     Digest<HMAC>    clientKey;
     Digest<HMAC>    serverKey;
 
     public:
-    DBInfo<Hi, HMAC, H, S> makeAuthInfo(std::string const& password, std::string const& sb64, std::size_t iterationCount)
+    DBInfo<Hi, HMAC, H, S> makeAuthInfo(std::string_view password, std::string_view sb64, std::size_t iterationCount)
     {
         saltBase64 = sb64;
         using namespace std::literals;
-        std::string salt    = std::string(make_decode64(std::begin(saltBase64)), make_decode64(std::end(saltBase64)));
+        String salt(make_decode64(std::begin(saltBase64)), make_decode64(std::end(saltBase64)));
 
         Hi::hash(normalize(password), salt, iterationCount, saltedPassword);
         HMAC::hash(saltedPassword.view(), "Server Key"s, serverKey);
@@ -68,7 +69,7 @@ struct ScramUtil
         }
         return message.substr(findSection, (sectionEnd - findSection));
     }
-    static std::string randomNonce()
+    static String randomNonce()
     {
         std::uint8_t buf[16];
         if (RAND_bytes(buf, sizeof(buf)) != 1)
@@ -80,15 +81,20 @@ struct ScramUtil
         }
         char* b = reinterpret_cast<char*>(buf);
         char* e = b + sizeof(buf);
-        return std::string(make_encode64(b), make_encode64(e));
+        return String(make_encode64(b), make_encode64(e));
     }
-    using CalcResp = std::tuple<std::string, std::string, std::string>;
+    using CalcResp = std::tuple<String, String, String>;
     template<typename Hi, typename HMAC, typename H, std::size_t S>
-    static CalcResp calcScram(std::string const& clientFirstMessage, std::string const& serverNonce, std::string const& serverFirstMessage, DBInfo<Hi, HMAC, H, S> const& info)
+    static CalcResp calcScram(std::string_view clientFirstMessage, std::string_view serverNonce, std::string_view serverFirstMessage, DBInfo<Hi, HMAC, H, S> const& info)
     {
-        using namespace std::literals;
-        std::string     response = "c=biws,r="s + serverNonce;
-        std::string     authMessage = clientFirstMessage.substr(3) + "," + serverFirstMessage + "," + response;
+        String     response("c=biws,r=");
+        response += serverNonce;
+
+        String     authMessage(clientFirstMessage.substr(3));
+        authMessage += ",";
+        authMessage += serverFirstMessage;
+        authMessage += ",";
+        authMessage += response;
 
         Digest<HMAC>    clientSignature;
         Digest<HMAC>    serverSignature;
@@ -99,9 +105,9 @@ struct ScramUtil
         {
             info.clientKey[loop] = info.clientKey[loop] ^ clientSignature[loop];
         }
-        std::string proof             = std::string(make_encode64(std::begin(info.clientKey)), make_encode64(std::end(info.clientKey)));
-        std::string serverSignature64 = std::string(make_encode64(std::begin(serverSignature)), make_encode64(std::end(serverSignature)));
-        return {response, proof, serverSignature64};;
+        String proof(make_encode64(std::begin(info.clientKey)), make_encode64(std::end(info.clientKey)));
+        String serverSignature64(make_encode64(std::begin(serverSignature)), make_encode64(std::end(serverSignature)));
+        return {response, proof, serverSignature64};
     }
 };
 
@@ -109,23 +115,24 @@ template<typename Hi, typename HMAC, typename H, std::size_t S>
 class ScramClient
 {
     std::string     user;
-    std::string     password;
-    std::string     nonce;
-    std::string     serverSignature64;
+    String          password;
+    String          nonce;
+    String          serverSignature64;
 
     private:
 
 
     public:
-        ScramClient(std::string const& user, std::string const& password, std::string nonce = ScramUtil::randomNonce())
+        ScramClient(std::string const& user, std::string_view password, String nonce = ScramUtil::randomNonce())
             : user(user)
             , password(password)
-            , nonce(nonce)
+            , nonce(std::move(nonce))
         {}
         std::string getFirstMessage()
         {
             using namespace std::literals;
-            std::string result = "n,,n="s + user + ",r=" + nonce;
+            std::string result = "n,,n="s + user + ",r=";
+            result += nonce;
             return result;
         }
         std::string getFinalMessage(std::string const& serverFirstMessage)
@@ -137,16 +144,20 @@ class ScramClient
             ScramMechanism<Hi, HMAC, H, S>  mechanism;
             DBInfo<Hi, HMAC, H, S> info = mechanism.makeAuthInfo(password, serverSalt, iteration);
 
-            std::string proof;
-            std::string response;
+            String proof;
+            String response;
             std::tie(response, proof, serverSignature64) = ScramUtil::calcScram<Hi, HMAC, H, S>(getFirstMessage(), serverNonce, serverFirstMessage, info);
 
-            return response + ",p=" + proof;
+            std::string result;
+            result += response;
+            result += ",p=";
+            result += proof;
+            return result;
         }
         bool validateServer(std::string const& serverFinalMessage)
         {
             std::string     vFlag = ScramUtil::getMessageBody("v=", serverFinalMessage);
-            return std::size(serverSignature64) == std::size(vFlag) && CRYPTO_memcmp(serverSignature64.c_str(), vFlag.c_str(), std::size(serverSignature64)) == 0;
+            return std::size(serverSignature64) == std::size(vFlag) && CRYPTO_memcmp(serverSignature64.data(), vFlag.data(), std::size(serverSignature64)) == 0;
         }
 };
 
@@ -154,9 +165,9 @@ template<typename Hi, typename HMAC, typename H, std::size_t S>
 class ScramServer
 {
     std::function<DBInfo<Hi, HMAC, H, S>(std::string const&)>   dbAccess;
-    std::function<std::string()>                                nonceGenerator;
-    std::string                                                 proof;
-    std::string                                                 serverSignature64;
+    std::function<String()>                                     nonceGenerator;
+    String                                                      proof;
+    String                                                      serverSignature64;
     public:
         template<typename F, typename N>
         ScramServer(F&& dbAccess, N&& nonceGenerator = [](){return ScramUtil::randomNonce();})
@@ -166,15 +177,18 @@ class ScramServer
         std::string getFirstMessage(std::string const& clientFirstMessage)
         {
             std::string             user        = ScramUtil::getMessageBody("u=", clientFirstMessage);
-            std::string             nonce       = ScramUtil::getMessageBody("r=", clientFirstMessage) + nonceGenerator();
+            String                  nonce(std::string_view(ScramUtil::getMessageBody("r=", clientFirstMessage)));
+            nonce += nonceGenerator();
             DBInfo<Hi, HMAC, H, S>  info        = dbAccess(user);
 
-            using namespace std::literals;
-            std::string serverFirstMessage = "r="s + nonce
-                                          + ",s="s + info.saltBase64
-                                          + ",i="s + std::to_string(info.iteration);
+            std::string serverFirstMessage = "r=";
+            serverFirstMessage += nonce;
+            serverFirstMessage += ",s=";
+            serverFirstMessage += info.saltBase64;
+            serverFirstMessage += ",i=";
+            serverFirstMessage += std::to_string(info.iteration);
 
-            std::string response;
+            String response;
             std::tie(response, proof, serverSignature64) = ScramUtil::calcScram<Hi, HMAC, H, S>(clientFirstMessage, nonce, serverFirstMessage, info);
 
             return serverFirstMessage;
@@ -182,8 +196,10 @@ class ScramServer
         std::pair<bool, std::string> getFinalMessage(std::string const& clientFinalMessage)
         {
             std::string p = ScramUtil::getMessageBody("p=", clientFinalMessage);
-            using namespace std::literals;
-            return {p == proof, "v="s + serverSignature64};
+            bool valid = p.size() == proof.size() && CRYPTO_memcmp(p.data(), proof.data(), p.size()) == 0;
+            std::string sig = "v=";
+            sig += serverSignature64;
+            return {valid, sig};
         }
 };
 
@@ -230,8 +246,8 @@ class ScramBase
 
     std::string     clientFirstMessageBare;
     std::string     serviceFirstMessage;
-    std::string     serverSignature64;
-    std::string     clientProof64;
+    String          serverSignature64;
+    String          clientProof64;
     NonceGenerator  nonceGenerator;
 
     public:
@@ -254,8 +270,8 @@ class ScramBase
         std::string getAuthMessage()                                            const     {return clientFirstMessageBare + "," + serviceFirstMessage + "," + getClientFinalMessageWithoutProof();}
 
         std::string const& getClientFirstMessageBare()                          const     {return clientFirstMessageBare;}
-        std::string const& getClientProof()                                     const     {return clientProof64;}
-        std::string const& getServerSignature()                                 const     {return serverSignature64;}
+        String const&      getClientProof()                                     const     {return clientProof64;}
+        String const&      getServerSignature()                                 const     {return serverSignature64;}
 
         bool validateNonce(std::string const& message)                          const     {return getServiceNonce() == getMessageBody("r=", message);}
         void setServiceFirstMessage(std::string const& sfm)                               {serviceFirstMessage = sfm;}
@@ -274,7 +290,7 @@ class ScramBase
 
             using namespace std::literals;
             std::string    saltBase64      = getServiceSalt();
-            std::string    salt              (make_decode64(std::begin(saltBase64)), make_decode64(std::end(saltBase64)));
+            String         salt              (make_decode64(std::begin(saltBase64)), make_decode64(std::end(saltBase64)));
             std::string    authMessage     = getAuthMessage();
 
             Hi::hash(normalize(password), salt, getServiceIteration(), saltedPassword);
@@ -288,8 +304,8 @@ class ScramBase
             {
                 clientKey[loop] = clientKey[loop] ^ clientSignature[loop];
             }
-            clientProof64     = std::string(make_encode64(std::begin(clientKey)), make_encode64(std::end(clientKey)));
-            serverSignature64 = std::string(make_encode64(std::begin(serverSignature)), make_encode64(std::end(serverSignature)));
+            clientProof64     = String(make_encode64(std::begin(clientKey)), make_encode64(std::end(clientKey)));
+            serverSignature64 = String(make_encode64(std::begin(serverSignature)), make_encode64(std::end(serverSignature)));
         }
 };
 
@@ -309,15 +325,18 @@ class ScramClient: public ScramBase<Hi, HMAC, H, S>
         }
         std::string getProofMessage(std::string const& password, std::string const& sfm)
         {
-            using namespace std::literals;
             Base::setServiceFirstMessage(sfm);
             Base::calculateClientScramHash(password);
-            std::string prof = Base::getClientFinalMessageWithoutProof() + ",p="s + Base::getClientProof();
+            std::string prof = Base::getClientFinalMessageWithoutProof();
+            prof += ",p=";
+            prof += Base::getClientProof();
             return prof;
         }
         bool verifyServer(std::string const& serverProof)
         {
-            return Base::getServerSignature() == Base::getVerification(serverProof);
+            auto const& sig = Base::getServerSignature();
+            auto        ver = Base::getVerification(serverProof);
+            return sig.size() == ver.size() && CRYPTO_memcmp(sig.data(), ver.data(), sig.size()) == 0;
         }
 };
 
@@ -347,11 +366,13 @@ class ScramServer: public ScramBase<Hi, HMAC, H, S>
         }
         std::string getProofMessage(std::string const& clientProof)
         {
-            using namespace std::literals;
             Base::calculateClientScramHash(Base::normalize(dbInfo(DBInfoType::Password, Base::getUserFromMessage())));
-            if (Base::getClientProof() == Base::getProofFromClinet(clientProof)  && Base::validateNonce(clientProof))
+            auto const& cp = Base::getClientProof();
+            auto        fp = Base::getProofFromClinet(clientProof);
+            if (cp.size() == fp.size() && CRYPTO_memcmp(cp.data(), fp.data(), cp.size()) == 0 && Base::validateNonce(clientProof))
             {
-                std::string prof = "v="s + Base::getServerSignature();
+                std::string prof = "v=";
+                prof += Base::getServerSignature();
                 return prof;
             }
             return "";
