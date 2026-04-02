@@ -9,6 +9,7 @@
 #include "base64.h"
 #include "ThorsLogging/ThorsLogging.h"
 #include <openssl/rand.h>
+#include <algorithm>
 
 // RFC-5801 Salted Challenge Response Authentication Mechanism (SCRAM) SASL and GSS-API Mechanisms
 
@@ -139,7 +140,7 @@ class ScramClient
         {
             std::string serverNonce = ScramUtil::getMessageBody("r=", serverFirstMessage);
             std::string serverSalt  = ScramUtil::getMessageBody("s=", serverFirstMessage);
-            std::size_t iteration   = std::stoi(ScramUtil::getMessageBody("i=", serverFirstMessage));
+            std::size_t iteration   = std::min(100'000, std::stoi(ScramUtil::getMessageBody("i=", serverFirstMessage)));
 
             ScramMechanism<Hi, HMAC, H, S>  mechanism;
             DBInfo<Hi, HMAC, H, S> info = mechanism.makeAuthInfo(password, serverSalt, iteration);
