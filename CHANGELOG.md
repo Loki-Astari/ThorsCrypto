@@ -6,7 +6,18 @@ This component is part of [ThorsAnvil](https://github.com/Loki-Astari/ThorsAnvil
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/).
 
-## [Unreleased]
+## [11.0.0] - 2026-06-24
+
+### Security
+- Replaced `std::string::operator==` with `CRYPTO_memcmp` to prevent timing attacks
+- Secured the random number generator
+- Cleanup memory after use for secure data (zeroing sensitive buffers)
+- Limited iteration count in PBKDF2 to prevent DoS attacks
+
+### Fixed
+- Fixed variable shadowing in `Pbkdf2::hash`
+- Fixed race condition
+- Removed unneeded diagnostic message
 
 ### Changed
 - Updated build tools
